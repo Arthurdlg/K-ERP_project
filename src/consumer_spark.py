@@ -2,7 +2,10 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
-spark = SparkSession.builder.appName("EcommerceRealTimeProcessing").getOrCreate()
+spark = SparkSession.builder \
+    .appName("EcommerceRealTimeProcessing") \
+    .config("spark.mongodb.output.uri", "mongodb://localhost:27017/ecommerce.orders") \
+    .getOrCreate()
 
 # schema for JSON data
 schema = StructType([
@@ -28,10 +31,14 @@ df = df.selectExpr("CAST(value AS STRING)") \
 # Cleanning data
 cleaned_df = df.dropna()
 
-# Write the data to console
+# Write cleaned data on mongodb
 query = cleaned_df.writeStream \
+    .foreachBatch(lambda batch_df, batch_id: batch_df.write \
+        .format("mongo") \
+        .mode("append") \
+        .option("uri", "mongodb://localhost:27017/ecommerce.orders") \
+        .save()) \
     .outputMode("append") \
-    .format("console") \
     .start()
 
 query.awaitTermination()

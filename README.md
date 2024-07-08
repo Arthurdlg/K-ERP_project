@@ -2,9 +2,8 @@
 
 <<<<<<< HEAD
 # Dependencies to install
-pip install pyspark
 pip install kafka-python
-pip install pymongo
+
 =======
 # Project Report
 -Introduction about the Project.
