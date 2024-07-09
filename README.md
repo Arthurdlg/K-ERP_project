@@ -3,6 +3,7 @@
 <<<<<<< HEAD
 # Dependencies to install
 pip install kafka-python
+pip install pyspark
 
 =======
 
