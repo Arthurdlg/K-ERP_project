@@ -1,0 +1,5 @@
+[
+    { "notification_id": "1", "user_id": "user1", "message": "Your order has been shipped.", "timestamp": "2023-07-08T10:00:00Z"},
+    { "notification_id": "2", "user_id": "user2", "message": "Your payment was successful.", "timestamp": "2023-07-08T10:05:00Z"},
+    { "notification_id": "3", "user_id": "user3", "message": "Your item is out for delivery.", "timestamp": "2023-07-08T10:10:00Z"}
+]

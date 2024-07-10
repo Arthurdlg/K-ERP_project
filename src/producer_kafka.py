@@ -1,4 +1,5 @@
 from kafka import KafkaProducer
+import os
 import json
 import time
 
@@ -7,16 +8,33 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
 
-transactions = [
-    {"order_id": "1", "product_id": "101", "quantity": 2, "price": 300, "timestamp": "2023-07-08T10:00:00Z"},
-    {"order_id": "2", "product_id": "102", "quantity": 1, "price": 150, "timestamp": "2023-07-08T10:05:00Z"},
-    {"order_id": "3", "product_id": "103", "quantity": 5, "price": 100, "timestamp": "2023-07-08T10:10:00Z"}
-]
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+orders_file_path = os.path.join(base_path, 'JSON', 'orders.json')
+iventory_file_path = os.path.join(base_path, 'JSON', 'iventory.json')
+notifs_file_path = os.path.join(base_path, 'JSON', 'notifs.json')
+
+with open(orders_file_path, 'r') as file:
+    transactions = json.load(file)
+
+with open(iventory_file_path, 'r') as file:
+    iventory = json.load(file)
+
+with open(notifs_file_path, 'r') as file:
+    notifs = json.load(file)
 
 for transaction in transactions:
     producer.send('orders', transaction)
     time.sleep(1)
 
+for item in iventory:
+    producer.send('iventory', item)
+    time.sleep(1)
+
+for notif in notifs:
+    producer.send('notifications', notif)
+    time.sleep(1)
+
 producer.flush()
 
 print("Messages sent to 'orders'")
+

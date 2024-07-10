@@ -1,10 +1,19 @@
 # F-5-project
 
 <<<<<<< HEAD
-# Dependencies to install
-pip install kafka-python
-pip install pyspark
+# Build project
+"Run Docker"
+docker-compose up -build
 
+"Install dependancies"
+pip install kafka-python
+
+"Build topics if not exist"
+python ./src/build_topics.py
+
+# Run
+python ./src/producer_kafka.py
+python ./src/consumer_spark.py
 =======
 
 # Project 1:

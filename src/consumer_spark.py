@@ -4,11 +4,10 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 spark = SparkSession.builder \
     .appName("EcommerceRealTimeProcessing") \
-    .config("spark.mongodb.output.uri", "mongodb://localhost:27017/ecommerce.orders") \
+    .config("spark.mongodb.write.connection.uri", "mongodb://localhost:27017/ecommerce") \
     .getOrCreate()
 
-# schema for JSON data
-schema = StructType([
+order_schema = StructType([
     StructField("order_id", StringType(), True),
     StructField("product_id", StringType(), True),
     StructField("quantity", IntegerType(), True),
@@ -16,29 +15,50 @@ schema = StructType([
     StructField("timestamp", StringType(), True)
 ])
 
-# Read data from Kafka
-df = spark.readStream \
-    .format("kafka") \
-    .option("kafka.bootstrap.servers", "kafka:9092") \
-    .option("subscribe", "orders") \
-    .load()
+inventory_schema = StructType([
+    StructField("product_id", StringType(), True),
+    StructField("product_name", StringType(), True),
+    StructField("warehouse_id", StringType(), True),
+    StructField("quantity", IntegerType(), True),
+    StructField("timestamp", StringType(), True)
+])
 
-# Convert the value column to string
-df = df.selectExpr("CAST(value AS STRING)") \
-    .select(from_json(col("value"), schema).alias("data")) \
-    .select("data.*")
+notification_schema = StructType([
+    StructField("notification_id", StringType(), True),
+    StructField("user_id", StringType(), True),
+    StructField("message", StringType(), True),
+    StructField("timestamp", StringType(), True)
+])
 
-# Cleanning data
-cleaned_df = df.dropna()
+def process_topic(topic, schema, collection):
+    df = spark.readStream \
+        .format("kafka") \
+        .option("kafka.bootstrap.servers", "kafka:9092") \
+        .option("subscribe", topic) \
+        .load()
 
-# Write cleaned data on mongodb
-query = cleaned_df.writeStream \
-    .foreachBatch(lambda batch_df, batch_id: batch_df.write \
-        .format("mongo") \
-        .mode("append") \
-        .option("uri", "mongodb://localhost:27017/ecommerce.orders") \
-        .save()) \
-    .outputMode("append") \
-    .start()
+    df = df.selectExpr("CAST(value AS STRING)") \
+        .select(from_json(col("value"), schema).alias("data")) \
+        .select("data.*")
 
-query.awaitTermination()
+    cleaned_df = df.dropna()
+
+    query = cleaned_df.writeStream \
+        .foreachBatch(lambda batch_df, batch_id: batch_df.write \
+            .format("mongodb") \
+            .mode("append") \
+            .option("database", "ecommerce") \
+            .option("collection", collection) \
+            .save()) \
+        .outputMode("append") \
+        .start()
+
+    return query
+
+order_query = process_topic("orders", order_schema, "orders")
+inventory_query = process_topic("inventory", inventory_schema, "inventory")
+notification_query = process_topic("notifications", notification_schema, "notifications")
+
+order_query.awaitTermination()
+inventory_query.awaitTermination()
+notification_query.awaitTermination()

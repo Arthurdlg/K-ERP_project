@@ -1,0 +1,5 @@
+[
+    { "product_id": "101", "product_name": "Laptop", "warehouse_id": "WH1", "quantity": 100, "timestamp": "2023-07-08T10:00:00Z"},
+    { "product_id": "102", "product_name": "Smartphone", "warehouse_id": "WH2", "quantity": 200, "timestamp": "2023-07-08T10:05:00Z"},
+    { "product_id": "103", "product_name": "Tablet", "warehouse_id": "WH1", "quantity": 150, "timestamp": "2023-07-08T10:10:00Z"}
+]

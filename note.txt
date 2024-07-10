@@ -1,0 +1,9 @@
+
+// Creer les topics
+
+
+// Ouvrir les topics
+docker exec -it k-erp_project-kafka-1 /bin/bash
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic orders --from-beginning
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic iventory --from-beginning
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic notifications --from-beginning
