@@ -1,10 +1,26 @@
+import sys
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
+from pymongo import MongoClient
+
+mongo_host = "localhost"
+mongo_port = "27017"
+mongo_database = "eCommerce"
+
+def write_to_mongodb(batch_df, batch_id, collection_name):
+    def save_to_mongodb(iterator):
+        client = MongoClient(mongo_host, mongo_port)
+        db = client[mongo_database]
+        collection = db[collection_name]
+        for record in iterator:
+            collection.insert_one(record.asDict())
+        client.close()
+
+    batch_df.foreachPartition(save_to_mongodb)
 
 spark = SparkSession.builder \
     .appName("EcommerceRealTimeProcessing") \
-    .config("spark.mongodb.write.connection.uri", "mongodb://localhost:27017/ecommerce") \
     .getOrCreate()
 
 order_schema = StructType([
@@ -12,25 +28,10 @@ order_schema = StructType([
     StructField("product_id", StringType(), True),
     StructField("quantity", IntegerType(), True),
     StructField("price", IntegerType(), True),
-    StructField("timestamp", StringType(), True)
+    StructField("timestamp", TimestampType(), True),
 ])
 
-inventory_schema = StructType([
-    StructField("product_id", StringType(), True),
-    StructField("product_name", StringType(), True),
-    StructField("warehouse_id", StringType(), True),
-    StructField("quantity", IntegerType(), True),
-    StructField("timestamp", StringType(), True)
-])
-
-notification_schema = StructType([
-    StructField("notification_id", StringType(), True),
-    StructField("user_id", StringType(), True),
-    StructField("message", StringType(), True),
-    StructField("timestamp", StringType(), True)
-])
-
-def process_topic(topic, schema, collection):
+def process_topic(topic, schema, collection_name):
     df = spark.readStream \
         .format("kafka") \
         .option("kafka.bootstrap.servers", "localhost:9092") \
@@ -45,17 +46,13 @@ def process_topic(topic, schema, collection):
     cleaned_df = df.dropna()
 
     query = cleaned_df.writeStream \
-        .foreachBatch(lambda batch_df, batch_id: batch_df.write \
-            .format("mongodb") \
-            .mode("append") \
-            .option("database", "ecommerce") \
-            .option("collection", collection) \
-            .save()) \
+        .foreachBatch(lambda batch_df, batch_id: write_to_mongodb(batch_df, batch_id, collection_name)) \
         .outputMode("append") \
         .start()
 
     return query
 
+# Traiter les différents topics
 order_query = process_topic("orders", order_schema, "orders")
 inventory_query = process_topic("inventory", inventory_schema, "inventory")
 notification_query = process_topic("notifications", notification_schema, "notifications")

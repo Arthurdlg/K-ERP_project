@@ -6,18 +6,22 @@ Docker
 MongoDB
 
 # Build project
+"Install dependancies"
+pip install confluent_kafka pymongo pandas pyspark
+
 "Run Docker"
 docker-compose up -build
-
-"Install dependancies"
-pip install kafka-python
 
 "Build topics if not exist"
 python ./src/build_topics.py
 
 # Run
+    * Produce data into Kafka topic *
 python ./src/producer_kafka.py
+    * Aggregate data *
 python ./src/consumer_spark.py
+    * Send aggregate data into database *
+python ./src/store_mongo.py
 
 # Delete docker containers
 docker-compose down -v

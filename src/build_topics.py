@@ -10,7 +10,7 @@ admin_client = KafkaAdminClient(
     client_id='test'
 )
 
-topics_to_create = ["orders", "inventory", "notifications"]
+topics_to_create = ["orders"]
 existing_topics = admin_client.list_topics()
 
 new_topics = []
