@@ -36,5 +36,5 @@ for notif in notifs:
 
 producer.flush()
 
-print("Messages sent to 'orders'")
+print("Messages sent to different topics successfully!")
 

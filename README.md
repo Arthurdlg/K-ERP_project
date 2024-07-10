@@ -14,6 +14,9 @@ python ./src/build_topics.py
 # Run
 python ./src/producer_kafka.py
 python ./src/consumer_spark.py
+
+# Delete docker containers
+docker-compose down -v
 =======
 
 # Project 1:
