@@ -15,8 +15,8 @@ docker-compose up -build
 python ./src/build_topics.py
 
 # Run
-    * Produce data into Kafka topic *
-python ./src/producer_kafka.py
+    Produce data into Kafka topic
+* python ./src/producer_kafka.py *
     * Clean data *
 python ./src/cons_clean.py
     * Send cleand data into database *
