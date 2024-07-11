@@ -9,7 +9,7 @@ client = MongoClient(host, port)
 db = client[database]
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-agg_json_file_path = os.path.join(base_path, 'JSON', 'aggregated_data.json')
+agg_json_file_path = os.path.join(base_path, 'JSON', 'cleaned_data.json')
 
 def store_in_mongodb():
     with open(agg_json_file_path, 'r') as file:
