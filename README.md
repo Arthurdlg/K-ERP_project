@@ -1,29 +1,45 @@
-# F-5-project
+# K-ERP project
 
 # Tools to install
 Docker
 MongoDB
 
 # Build project
-"Install dependancies"
+### Install dependancies
+```
 pip install confluent_kafka pymongo pandas
+```
 
-"Run Docker"
+### Run Docker
+```
 docker-compose up -build
+```
 
-"Build topics if not exist"
+### Build topics if not exist
+```
 python ./src/build_topics.py
+```
 
 # Run
-    Produce data into Kafka topic
-* python ./src/producer_kafka.py *
-    * Clean data *
+  ### * Produce data into Kafka topic *
+```
+python ./src/producer_kafka.py 
+```
+  
+  ### * Clean data *
+```
 python ./src/cons_clean.py
-    * Send cleand data into database *
+```
+
+  ### * Send cleand data into database *
+```  
 python ./src/store_mongo.py
+```
 
 # Delete docker containers
+```
 docker-compose down -v
+```
 
 # Project 1:
 Description:
